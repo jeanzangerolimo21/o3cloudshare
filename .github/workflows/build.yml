@@ -1,39 +1,94 @@
-name: Build O3 Client (Official Method)
+name: Build O3 Cloud Share Client (Full)
 
 on:
   push:
     branches: [ main ]
 
 jobs:
+
+# =========================
+# 🐧 LINUX BUILD
+# =========================
   build-linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install dependencies
+      - name: Install Craft
         run: |
-          sudo apt update
-          sudo apt install -y \
-            build-essential \
-            cmake \
-            qtbase5-dev \
-            extra-cmake-modules \
-            libssl-dev \
-            libsqlite3-dev \
-            libqt5svg5-dev \
-            libqt5keychain-dev
+          git clone https://invent.kde.org/packaging/craft.git
+          echo "export PATH=$PWD/craft/bin:$PATH" >> $GITHUB_ENV
 
-      - name: Build
+      - name: Setup Craft
         run: |
-          mkdir build
-          cd build
-          cmake ..
-          make -j4
+          craft --setup
 
-      - name: Upload
+      - name: Build Nextcloud Client
+        run: |
+          craft nextcloud-client
+
+      - name: Upload Linux build
         uses: actions/upload-artifact@v4
         with:
           name: o3-linux
-          path: build/
+          path: CraftRoot/tmp/
+
+# =========================
+# 🪟 WINDOWS BUILD
+# =========================
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Craft
+        run: |
+          git clone https://invent.kde.org/packaging/craft.git
+
+      - name: Setup Craft
+        run: |
+          craft\craftenv.ps1
+          craft --setup
+
+      - name: Build
+        run: |
+          craft nextcloud-client
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: o3-windows
+          path: CraftRoot\tmp\
+
+# =========================
+# 🍎 MACOS BUILD
+# =========================
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Craft
+        run: |
+          git clone https://invent.kde.org/packaging/craft.git
+
+      - name: Setup Craft
+        run: |
+          source craft/craftenv.sh
+          craft --setup
+
+      - name: Build
+        run: |
+          craft nextcloud-client
+
+      - name: Upload macOS build
+        uses: actions/upload-artifact@v4
+        with:
+          name: o3-macos
+          path: CraftRoot/tmp/
