@@ -1,75 +1,39 @@
-name: Build O3 Cloud Share Client
+name: Build O3 Client (Official Method)
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-
   build-linux:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout código
+      - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Instalar dependências
+      - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y cmake qtbase5-dev build-essential
+          sudo apt install -y \
+            build-essential \
+            cmake \
+            qtbase5-dev \
+            extra-cmake-modules \
+            libssl-dev \
+            libsqlite3-dev \
+            libqt5svg5-dev \
+            libqt5keychain-dev
 
-      - name: Build Linux
+      - name: Build
         run: |
           mkdir build
           cd build
           cmake ..
           make -j4
 
-      - name: Upload artefato Linux
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: o3-linux
-          path: build/
-
-  build-windows:
-    runs-on: windows-latest
-
-    steps:
-      - name: Checkout código
-        uses: actions/checkout@v3
-
-      - name: Setup Qt
-        uses: jurplel/install-qt-action@v3
-
-      - name: Build Windows
-        run: |
-          mkdir build
-          cd build
-          cmake ..
-          cmake --build . --config Release
-
-      - name: Upload artefato Windows
-        uses: actions/upload-artifact@v4
-        with:
-          name: o3-windows
-          path: build/
-
-  build-macos:
-    runs-on: macos-latest
-
-    steps:
-      - name: Checkout código
-        uses: actions/checkout@v3
-
-      - name: Build macOS
-        run: |
-          mkdir build
-          cd build
-          cmake ..
-          make
-
-      - name: Upload artefato macOS
-        uses: actions/upload-artifact@v4
-        with:
-          name: o3-macos
           path: build/
